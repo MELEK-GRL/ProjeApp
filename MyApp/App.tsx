@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import MainLayout from './src/components/layout/MainLayout';
 import 'react-native-gesture-handler';
-
+import 'react-native-url-polyfill/auto';
 function App() {
   return (
     <View style={styles.container}>

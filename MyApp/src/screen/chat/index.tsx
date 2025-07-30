@@ -11,29 +11,45 @@ import {
   ListRenderItemInfo,
 } from 'react-native';
 
-// Mesaj tipimizi tanımlıyoruz
+import { makeChatRequest } from '../../utils/gptUtils';  // Yolunu kontrol et
+
 type Message = {
   id: string;
   text: string;
 };
 
 const Chat: React.FC = () => {
-  // State tipleri ile birlikte
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Merhaba!' },
     { id: '2', text: 'Nasılsın?' },
   ]);
   const [inputText, setInputText] = useState<string>('');
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (inputText.trim() === '') return;
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: (messages.length + 1).toString(),
       text: inputText.trim(),
     };
-    setMessages(prev => [...prev, newMessage]);
+
+    setMessages(prev => [...prev, userMessage]);
     setInputText('');
+
+   try {
+  const botResponse = await makeChatRequest(userMessage.text);
+  console.log("OpenAI yanıtı:", botResponse);
+
+  const botMessage: Message = {
+    id: (messages.length + 2).toString(),
+    text: botResponse,
+  };
+
+  setMessages(prev => [...prev, botMessage]);
+} catch (error) {
+  console.error('OpenAI API hata:', error);
+}
+
   };
 
   const renderMessage = ({ item }: ListRenderItemInfo<Message>) => (
@@ -67,7 +83,8 @@ const Chat: React.FC = () => {
         />
         <TouchableOpacity
           style={styles.sendButton}
-          onPress={sendMessage}
+         // onPress={sendMessage}
+           onPress={()=>{}}
           activeOpacity={0.7}
         >
           <Text style={styles.sendButtonText}>Gönder</Text>
@@ -78,15 +95,8 @@ const Chat: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafd',
-  },
-  messagesList: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
+  container: { flex: 1, backgroundColor: '#f9fafd' },
+  messagesList: { flex: 1, paddingHorizontal: 20, paddingTop: 10 },
   messageBubble: {
     backgroundColor: '#e0e7ff',
     padding: 12,
@@ -100,10 +110,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  messageText: {
-    fontSize: 16,
-    color: '#333',
-  },
+  messageText: { fontSize: 16, color: '#333' },
   inputContainer: {
     flexDirection: 'row',
     paddingHorizontal: 15,
@@ -136,11 +143,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  sendButtonText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 16,
-  },
+  sendButtonText: { color: 'white', fontWeight: '700', fontSize: 16 },
 });
 
 export default Chat;
