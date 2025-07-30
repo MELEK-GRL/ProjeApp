@@ -1,4 +1,4 @@
-
+// Chat.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -9,11 +9,10 @@ import {
   Platform,
   ListRenderItemInfo,
 } from 'react-native';
-
-import { makeChatRequest } from '../../utils/gptUtils';
 import TextInputComponent from '../../components/Input/TextInputComponent';
+import { API_BASE_URL } from '@env'; // .env'den IP alınır
 
-type Message = {
+export type Message = {
   id: string;
   text: string;
   sender: 'user' | 'ai';
@@ -43,41 +42,49 @@ const Chat: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
 
-    let fullPrompt = inputText.trim();
-    if (selectedPdf) {
-      fullPrompt += `\n\nAşağıda PDF içeriği yer alıyor. Bu tahlil sonuçlarını yorumla:\n[Base64 içerik]: ${selectedPdf.base64}`;
-    }
-
     try {
-      const botResponse = await makeChatRequest(fullPrompt);
+      let response;
+      if (selectedPdf) {
+        response = await fetch(`${API_BASE_URL}/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: selectedPdf.name,
+            fileBase64: selectedPdf.base64,
+          }),
+        });
+      } else {
+        response = await fetch(`${API_BASE_URL}/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: inputText.trim() }),
+        });
+      }
 
+      const result = await response.json();
       const botMessage: Message = {
         id: (messages.length + 2).toString(),
-        text: botResponse,
+        text: result.answer,
         sender: 'ai',
       };
 
       setMessages(prev => [...prev, botMessage]);
       setSelectedPdf(undefined);
     } catch (error) {
-      console.error('OpenAI API hata:', error);
+      console.error('🛑 API Hatası:', error);
     }
   };
 
-  const renderMessage = ({ item }: ListRenderItemInfo<Message>) => {
-    const isUser = item.sender === 'user';
-
-    return (
-      <View
-        style={[
-          styles.messageBubble,
-          isUser ? styles.userBubble : styles.aiBubble,
-        ]}
-      >
-        <Text style={styles.messageText}>{item.text}</Text>
-      </View>
-    );
-  };
+  const renderMessage = ({ item }: ListRenderItemInfo<Message>) => (
+    <View
+      style={[
+        styles.messageBubble,
+        item.sender === 'user' ? styles.userBubble : styles.aiBubble,
+      ]}
+    >
+      <Text style={styles.messageText}>{item.text}</Text>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
