@@ -1,9 +1,8 @@
-// src/components/layout/MainLayout.tsx
-import React from 'react';
+import React, { FC } from 'react';
 import { View, StyleSheet } from 'react-native';
 import BottomTabNavigator from '../../navigation/BottomTabNavigator';
 
-const MainLayout = () => {
+const MainLayout: FC = () => {
   return (
     <View style={styles.container}>
       <BottomTabNavigator />

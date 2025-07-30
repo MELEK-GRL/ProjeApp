@@ -1,32 +1,46 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  FlatList, 
-  StyleSheet, 
-  KeyboardAvoidingView, 
-  Platform 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ListRenderItemInfo,
 } from 'react-native';
 
-const Chat = () => {
-  const [messages, setMessages] = useState([
+// Mesaj tipimizi tanımlıyoruz
+type Message = {
+  id: string;
+  text: string;
+};
+
+const Chat: React.FC = () => {
+  // State tipleri ile birlikte
+  const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: 'Merhaba!' },
     { id: '2', text: 'Nasılsın?' },
   ]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState<string>('');
 
   const sendMessage = () => {
     if (inputText.trim() === '') return;
 
-    const newMessage = {
+    const newMessage: Message = {
       id: (messages.length + 1).toString(),
-      text: inputText,
+      text: inputText.trim(),
     };
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setInputText('');
   };
+
+  const renderMessage = ({ item }: ListRenderItemInfo<Message>) => (
+    <View style={styles.messageBubble}>
+      <Text style={styles.messageText}>{item.text}</Text>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -39,11 +53,7 @@ const Chat = () => {
         keyExtractor={item => item.id}
         style={styles.messagesList}
         contentContainerStyle={{ paddingBottom: 20 }}
-        renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
-        )}
+        renderItem={renderMessage}
       />
 
       <View style={styles.inputContainer}>
@@ -55,7 +65,11 @@ const Chat = () => {
           placeholderTextColor="#999"
           multiline
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={sendMessage}
+          activeOpacity={0.7}
+        >
           <Text style={styles.sendButtonText}>Gönder</Text>
         </TouchableOpacity>
       </View>
