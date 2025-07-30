@@ -1,17 +1,12 @@
-
 import React from 'react';
-
-import {  SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import MainLayout from './src/components/layout/MainLayout';
+import 'react-native-gesture-handler';
 
 function App() {
-
-console.log('--->hı')
   return (
     <View style={styles.container}>
-     
-   <SafeAreaView>
-      <Text>HEOLLO</Text>
-   </SafeAreaView>
+      <MainLayout />
     </View>
   );
 }
